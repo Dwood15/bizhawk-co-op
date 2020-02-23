@@ -16,6 +16,7 @@ host.client_ping = {}
 local itemcount
 
 function host.start()
+	printOutput("host.start beginning")
 	if (host.status == 'Host') then
 		if host.locked then
 			local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/create' ..
@@ -78,6 +79,7 @@ function host.start()
 
 	coroutine.yield()
 
+	printOutput("creating the server")
 	--create the server
 	server = socket.bind("*", config.port, 1)
 	if (server == nil) then
@@ -187,6 +189,7 @@ end
 
 
 function host.join()
+	printOutput("host.join")
 	if (sync.loadramcontroller() == false) then
 		return
 	end
@@ -263,13 +266,15 @@ function host.join()
 		host.close()
 		updateGUI()
 	end
-
+	printOutput("end host.join")
 	return
 end
 
 
 --when the script finishes, make sure to close the connection
 function host.close()
+	printOutput("closing connection")
+
 	host.status = 'Idle'
 	host.locked = false
 
@@ -302,6 +307,7 @@ function host.close()
 		printOutput("Server closed.")
 		updateGUI()
 	end
+	printOutput("end host.close()")
 end
 
 
@@ -319,7 +325,8 @@ end
 
 
 --Get the list of Rooms
-function host.getRooms() 
+function host.getRooms()
+	printOutput("getting rooms")
 	local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/getrooms')
 	if (err == 200) then
 		if (roomstr == '') then

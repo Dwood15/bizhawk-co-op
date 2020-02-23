@@ -46,6 +46,7 @@ local player_num = mainmemory.read_u8(player_id_addr)
 
 -- gives an item
 local get_item = function(item)
+	printOutput("attempting to give the player an item")
 	if (item.i == 0) then
 		-- Trying to place padded items
 		printOutput("[Warn] Received an invalid item!")
@@ -72,6 +73,8 @@ local player_names = {}
 
 
 local save_entry = function(key, value)
+	printOutput("attempting to save entry")
+
 	if value.i == 0 then
 		return
 	end
@@ -88,6 +91,7 @@ end
 
 
 local load_save = function()
+	printOutput("attempting to load savedata")
 	-- open file
 	local file_loc = '.\\bizhawk-co-op\\savedata\\' .. gameinfo.getromname() .. '.dat'
 	local f = io.open(file_loc, "r")
@@ -120,6 +124,7 @@ load_save()
 
 local shop_scenes = {[0x2C]=1, [0x2D]=1, [0x2E]=1, [0x2F]=1, [0x30]=1, [0x31]=1, [0x32]=1, [0x33]=1, [0x42]=1, [0x4B]=1}
 local function safeToGiveItem()
+	printOutput("checking if it's safe to give an item")
 	local details
 	local scene
 	_, details = oot.get_current_game_mode()
@@ -147,6 +152,7 @@ local function processQueue()
 		if received_counter > internal_count then
 			local item = received_items[internal_count + 1]
 			get_item(item)
+			printOutput("giving item: [" .. item .. "]")
 		end
 	end
 end
@@ -300,6 +306,7 @@ function oot_rom.getMessage()
 
 	-- return the messages
 	if has_content then
+		printOutput("ootRom.getMessage() attempting to process message: [" .. message .. "]")
 		return message
 	else
 		return false
@@ -309,6 +316,7 @@ end
 
 -- Process a message from another player and update RAM
 function oot_rom.processMessage(their_user, message)
+	printOutput("oot_rom.processMessage: user:" .. their_user .. " message [" .. message .. "]")
 	-- "i" type is for handling item split events, which
 	-- is not something this ram controller does. However
 	-- this event will happen any time a player joins,

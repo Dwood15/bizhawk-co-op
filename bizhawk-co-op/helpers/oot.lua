@@ -1108,5 +1108,5 @@ end
 
 
 setmetatable(_G, old_global_metatable)
-
+printOutput("oot.lua added")
 return oot

@@ -165,6 +165,7 @@ function timer_coroutine(time, callback)
         coroutine.yield(false)
       else
         init = now
+        printOutput("timer coroutine triggered")
         coroutine.yield(callback())
       end
     end
@@ -177,6 +178,7 @@ coroutine.resume(ping_timer, 10, ping_func)
 --pressed for both players on every frame. Sends and receives instructions
 --that must be performed simultaneously; such as pausing and saving
 function sync.syncRAM()
+  printOutput("sync RAM ")
   while true do
     -- check for PING TIMEOUT and send PINGS
     if coroutine.status(ping_timer) == "dead" then
@@ -191,6 +193,7 @@ function sync.syncRAM()
 
     --Send Quit request
     if sendMessage["Quit"] == true then
+      printOutput("sendMessage QUIT")
       sendMessage["Quit"] = nil
 
       for _,client in pairs(host.clients) do

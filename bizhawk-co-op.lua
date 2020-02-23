@@ -32,20 +32,19 @@ function strsplit(inputstr, sep, max)
 end
 
 local filename = "mw-coop-log.txt"
-
+local file = io.open(filename, 'a')
 --Add a line to the output. Inserts a timestamp to the string
 function printOutput(str) 
 	str = string.gsub (str, "\n", "\r\n")
 	str = "[" .. os.date("%H:%M:%S", os.time()) .. "] " .. str
 
-	local file = io.open(filename, 'a')
 	if file ~= nil then
 		console.writeline(str)
 		file:write(str)
 		file:close()
-	else
-	console.writeline("LUA is Unable to open file: " .. filename)
+		return
 	end
+	console.writeline("LUA is Unable to open file: " .. filename)
 end
 
 host = require("bizhawk-co-op\\host")
@@ -118,6 +117,7 @@ event.onexit(function () host.close(); forms.destroy(mainform) end)
 
 --Load the changes from the form and disable any appropriate components
 function prepareConnection()
+	printOutput("prepareConnection")
 	if roomlist then
 		config.room = forms.gettext(ddRooms)
 	else 
@@ -128,11 +128,13 @@ function prepareConnection()
 	config.pass = forms.gettext(txtPass)
 	config.port = forms.gettext(txtPort)
 	config.hostname = forms.gettext(txtIP)
+	printOutput("end prepareConnection")
 end
 
 
 --Quit/Disconnect click handle for the quit button
 function leaveRoom()
+	printOutput("leaving room")
 	if (host.connected()) then
 		sendMessage["Quit"] = true
 	else 
@@ -257,6 +259,7 @@ while 1 do
 
 	--If connected, run the syncinputs thread
 	if host.connected() then
+		printOutput("host is connected, attempting to sync")
 		--If the thread didn't yield, then create a new one
 		if thread == nil or coroutine.status(thread) == "dead" then
 			thread = coroutine.create(sync.syncRAM)
