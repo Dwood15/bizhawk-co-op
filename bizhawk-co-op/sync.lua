@@ -103,6 +103,10 @@ end
 
 function sync.sendItems(itemlist)
   for _,client in pairs(host.clients) do
+  printOutput("processing itemList for client: [" .. client .. "]")
+  printOutput("said itemList: " .. itemlist)
+
+
     messenger.send(client, config.user, messenger.RAMEVENT, {["i"]=itemlist})
   end 
   ram_controller.processMessage(config.user, {["i"]=itemlist})
@@ -111,6 +115,8 @@ end
 
 
 local close_client = function(clientID, err)
+  printOutput("close client, clientID: [" .. clientID .. "] err: " .. err)
+
   local their_user = "The other player"
   for name, id in pairs(host.users) do
     if id == clientID then
@@ -142,6 +148,7 @@ end
 local ping_func = function()
   for clientID, client in pairs(host.clients) do
     -- send PING message
+    printOutput("calling ping func for clientID: " .. clientID)
     messenger.send(client, config.user, messenger.PING)
 
     -- check if they have timedout
