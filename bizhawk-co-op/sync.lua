@@ -36,11 +36,12 @@ function sync.syncconfig(client_socket, their_id)
 
   --construct a value representing the sync code that is in use
   local sync_code = ""
-  for line in io.lines("bizhawk-co-op.lua") do sync_code = sync_code .. line .. "\n" end
-  for line in io.lines("bizhawk-co-op\\host.lua") do sync_code = sync_code .. line .. "\n" end
-  for line in io.lines("bizhawk-co-op\\messenger.lua") do sync_code = sync_code .. line .. "\n" end
-  for line in io.lines("bizhawk-co-op\\sync.lua") do sync_code = sync_code .. line .. "\n" end
-  for line in io.lines("bizhawk-co-op\\ramcontroller\\" .. config.ramcode) do sync_code = sync_code .. line .. "\n" end
+  -- COMMENTED OUT FOR DEVELOPMENT PURPOSES
+  -- for line in io.lines("bizhawk-co-op.lua") do sync_code = sync_code .. line .. "\n" end
+  -- for line in io.lines("bizhawk-co-op\\host.lua") do sync_code = sync_code .. line .. "\n" end
+  -- for line in io.lines("bizhawk-co-op\\messenger.lua") do sync_code = sync_code .. line .. "\n" end
+  -- for line in io.lines("bizhawk-co-op\\sync.lua") do sync_code = sync_code .. line .. "\n" end
+  -- for line in io.lines("bizhawk-co-op\\ramcontroller\\" .. config.ramcode) do sync_code = sync_code .. line .. "\n" end
   local sync_hash = sha1.sha1(sync_code)
   
   -- only host sends config
@@ -74,12 +75,14 @@ function sync.syncconfig(client_socket, their_id)
 
   --check consistency of configurations
   --check sync code
-  if (sync_hash ~= their_sync_hash) then
-    printOutput("Configuration consistency check failed: Bad hash")
-    printOutput("You are not both using the same sync code (perhaps one of you is using an older version?)")
-    printOutput("Make sure your sync code is the same and try again.")
-    return false
-  end
+
+    -- COMMENTED OUT FOR DEVELOPMENT PURPOSES
+  -- if (sync_hash ~= their_sync_hash) then
+    -- printOutput("Configuration consistency check failed: Bad hash")
+    -- printOutput("You are not both using the same sync code (perhaps one of you is using an older version?)")
+    -- printOutput("Make sure your sync code is the same and try again.")
+    -- return false
+  -- end
 
   if my_new_id ~= nil then
     my_ID = my_new_id
