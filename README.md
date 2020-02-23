@@ -2,30 +2,6 @@
 
 bizhawk-co-op is a Lua script for BizHawk that allows two or more people to play a co-op experience by sharing inventory/ammo/hp over the network. This will work with vanilla versions of the games and also randomizers.
 
-## Metroid: Zero Mission Co-op
-
-Health and ammo is shared. Items obtained by a player are given to everyone. Items locations are split such that each item can be optained by only one player. The other players will find a screw attack block in its place. The items at the unknown item locations, power grip location, and imago location can be obtained by either player. Events such as boss deaths are also shared.
-
-## Link to the Past Co-op
-
-Items obtained by a player are given to everyone. Items locations are split such that each item can be optained by only one player. It's usually a good idea to spread out on the overworld and communicate which items still need to be checked by who. With Split Keys or Raid Bosses enabled, it's highly recommended to enter dungeons together. The following can are configurable:
- 
-* **Health and Ammo** Health and ammo is shared. This includes bottles, bombs, arrows, magic, etc. Death is synced, so if you notice a pause, it's because the script is waiting for everyone to die together
-* **Split Big Keys** If enabled then dungeon Big Keys will be split so only one person can obtain it. Otherwise either player can get them.
-* **Split Small Keys** Similar to Big Keys, but is for the dungeon Small Keys. This includes Pot Keys and Enemy Drop Keys. Using a key does not remove other players keys. When disabled keys are not shared.
-* **Raid Bosses** Bosses share HP. Bosses have scaled HP based on the number players. Players get a damage boost if they attack the boss together at the same time. If everyone is fighting together, then the boss should have similar amount of health as solo. A known bug is that boss that can normally be killed in one hit still die in one hit, so bring your silver arrows with you. You can also have someone stay behind and be the dedicated healer at the cost of dps.
-
-| Players | Boss HP |
-|---|-------|
-| 1 | 1x    |
-| 2 | 3.5x  |
-| 3 | 9.5x  |
-| 4 | 23.5x |
-| 5 | 55.5x |
-| ... | ... |
-
-* **Junk Chests** If enabled then item locations not owned by players are filled with random junk items. Having this enabled will make it harder to coordinate who still needs to chest some item location. When disabled they are instead replaced with empty chests. If you find an empty location it means that someone else owns that item location and should check it still.
-
 ## Ocarina of Time Cross World Co-op
 
 Nothing is shared, however there are now player specific items which are mixed between all the worlds. So if you obtain an item for yourself only you get it. If you obtain an item for another player then only they get it. This effectively means everyone will be playing different intermingled seeds.

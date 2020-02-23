@@ -888,10 +888,6 @@ local function Skulltula(layout, scene, flag)
 	return obj
 end
 
-
-
-
-
 -- GAME STATE
 local state_main = Pointer:new( 0x11B92F, Int(1) )
 local state_sub = Pointer:new( 0x11B933, Int(1) )

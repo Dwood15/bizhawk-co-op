@@ -254,7 +254,7 @@ function host.join()
 	coroutine.yield()
 
 	--sync the gameplay
-	if (sync.syncconfig(client, nil)) then	
+	if (sync.syncconfig(client, nil)) then
 		host.clients[1] = client
 		host.client_ping[1] = 4
 		host.users[host.hostname] = 1

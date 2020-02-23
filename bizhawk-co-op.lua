@@ -198,8 +198,7 @@ lblRamCode = forms.label(mainform, "Game Script:", 10, 140)
 forms.setproperty(txtPass, 'PasswordChar', '*')
 
 
-btnQuit = forms.button(mainform, "Leave Room", leaveRoom, 
-	15, 166, 85, 25)
+btnQuit = forms.button(mainform, "Leave Room", leaveRoom, 15, 166, 85, 25)
 forms.setproperty(btnQuit, 'Enabled', false)
 btnHost = forms.button(mainform, "Create Room", 
 	function() prepareConnection(); guiClick["Host Server"] = host.start end, 

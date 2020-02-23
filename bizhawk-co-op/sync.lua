@@ -3,7 +3,7 @@
 local sync = {}
 
 local messenger = require("bizhawk-co-op\\messenger")
-local ram_controller 
+local ram_controller
 
 my_ID = nil
 
@@ -187,7 +187,7 @@ function sync.syncRAM()
     end
 
     --Send Quit request
-    if sendMessage["Quit"] == true then 
+    if sendMessage["Quit"] == true then
       sendMessage["Quit"] = nil
 
       for _,client in pairs(host.clients) do
