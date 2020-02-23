@@ -31,25 +31,21 @@ function strsplit(inputstr, sep, max)
   return t
 end
 
-
-local sync = require("bizhawk-co-op\\sync")
-
+local filename = "mw-coop-log.txt"
 
 --Add a line to the output. Inserts a timestamp to the string
 function printOutput(str) 
-	local text = forms.gettext(text1)
-	local pos = #text
-	forms.setproperty(text1, "SelectionStart", pos)
-
 	str = string.gsub (str, "\n", "\r\n")
 	str = "[" .. os.date("%H:%M:%S", os.time()) .. "] " .. str
-	if pos > 0 then
-		str = "\r\n" .. str
+
+	local file = io.open(filename, 'a')
+	if file ~= nil then
+		file:write(str)
+		file:close()
+	else
+	console.writeline("LUA is Unable to open file: " .. filename)
 	end
-
-	forms.setproperty(text1, "SelectedText", str)
 end
-
 
 host = require("bizhawk-co-op\\host")
 
@@ -216,6 +212,9 @@ local threads = {}
 
 emu.yield()
 emu.yield()
+
+
+local sync = require("bizhawk-co-op\\sync")
 
 ---------------------
 --    Main loop    --
