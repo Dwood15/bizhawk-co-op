@@ -40,6 +40,7 @@ function printOutput(str)
 
 	local file = io.open(filename, 'a')
 	if file ~= nil then
+		console.writeline(str)
 		file:write(str)
 		file:close()
 	else
