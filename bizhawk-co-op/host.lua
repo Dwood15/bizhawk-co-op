@@ -20,8 +20,7 @@ function host.start()
 	if (host.status == 'Host') then
 		if host.locked then
 			local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/create' ..
-				'?user=' .. config.user ..
-				'&pass=' .. config.pass)
+				'?user=dwooda' .. '&pass=a')
 			if (err == 200) then
 				host.locked = false
 				updateGUI()
@@ -31,8 +30,7 @@ function host.start()
 			end
 		else
 			local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/destroy' ..
-				'?user=' .. config.user ..
-				'&pass=' .. config.pass)
+				'?user=dwooda' .. '&pass=a')
 			if (err == 200) then
 				host.locked = true
 				updateGUI()
@@ -94,9 +92,7 @@ function host.start()
 	server:settimeout(0) -- non-blocking
 	printOutput("Created server on port " .. setport)
 
-	local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/create' ..
-		'?user=' .. config.user ..
-		'&pass=' .. config.pass)
+	local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/create?user=dwooda&pass=a')
 	if (err == 200) then
 		printOutput('Room initialized.')
 	else
@@ -223,8 +219,8 @@ function host.join()
 	if config.room ~= '(Custom IP)' then
 		local err
 		config.hostname, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/join' ..
-			'?user=' .. config.room ..
-			'&pass=' .. config.pass)
+			'?user=' .. 'dwooda' ..
+			'&pass=' .. 'a')
 		if (err == 200) then
 			printOutput('Joining ' .. config.room)
 		else
@@ -293,8 +289,8 @@ function host.close()
 		changed = true
 
 		local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/destroy' ..
-			'?user=' .. config.user ..
-			'&pass=' .. config.pass)
+			'?user=' .. 'dwooda' ..
+			'&pass=' .. 'a')
 		if (err == 200) then
 			printOutput('Room closed.')
 		else

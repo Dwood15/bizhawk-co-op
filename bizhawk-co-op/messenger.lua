@@ -137,6 +137,8 @@ function messenger.send(client_socket, user, message_type, ...)
   --encode the message
   local message = message_type_to_char[message_type] .. user .. ',' .. encoder(data)
   --send the message
+  printOutput("sending message: " .. message)
+
   client_socket:send(message .. "\n")
 end
 
@@ -221,6 +223,8 @@ function messenger.receive(client_socket, nonblocking)
     printOutput("Recieved an unidentifiable message: " .. message)
     return nil
   end
+
+  printOutput("message received: " .. message)
   message = message:sub(2)
   --decode the message
   local decoder = decode_message[message_type]

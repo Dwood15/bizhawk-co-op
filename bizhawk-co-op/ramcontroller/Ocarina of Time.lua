@@ -11,7 +11,7 @@ local function declare (name, initval)
 end
 
 local oot = require('bizhawk-co-op\\helpers\\oot')
-
+local json = require('bizhawk-co-op\\json\\json')
 local oot_rom = {}
 
 local rando_context = mainmemory.read_u32_be(0x1C6E90 + 0x15D4) - 0x80000000
@@ -151,7 +151,7 @@ local function processQueue()
 		if received_counter > internal_count then
 			local item = received_items[internal_count + 1]
 			get_item(item)
-			printOutput("giving item: [" .. item .. "]")
+			printOutput("giving items: [" ..  json.encode(received_items) .. "]")
 		end
 	end
 end
@@ -305,7 +305,7 @@ function oot_rom.getMessage()
 
 	-- return the messages
 	if has_content then
-		printOutput("ootRom.getMessage() attempting to process message: [" .. message .. "]")
+		printOutput("ootRom.getMessage() attempting to process message: ")
 		return message
 	else
 		return false
@@ -315,7 +315,7 @@ end
 
 -- Process a message from another player and update RAM
 function oot_rom.processMessage(their_user, message)
-	printOutput("oot_rom.processMessage: user:" .. their_user .. " message [" .. message .. "]")
+	printOutput("oot_rom.processMessage: user:" .. their_user .. json.encode(message))
 	-- "i" type is for handling item split events, which
 	-- is not something this ram controller does. However
 	-- this event will happen any time a player joins,
@@ -359,6 +359,8 @@ function oot_rom.processMessage(their_user, message)
 		if table_count(message["m"]) > 1 then
 			printOutput("[Warn] " .. their_user .. " detected you were missing items. Attempting to resync...")
 		end
+
+		printOutput("handling message: " .. json.encode(message))
 
 		for _,item in pairs(message["m"]) do
 			-- check if this is for this player, otherwise, ignore it

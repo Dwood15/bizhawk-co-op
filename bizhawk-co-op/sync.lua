@@ -100,13 +100,12 @@ function sync.syncconfig(client_socket, their_id)
   return their_user
 end
 
+local json = require('bizhawk-co-op\\json\\json')
 
 function sync.sendItems(itemlist)
   for _,client in pairs(host.clients) do
-  printOutput("processing itemList for client: [" .. client .. "]")
-  printOutput("said itemList: " .. itemlist)
-
-
+	printOutput("processing itemList for client:")
+	printOutput("said itemList: " .. json.encode(itemlist))
     messenger.send(client, config.user, messenger.RAMEVENT, {["i"]=itemlist})
   end 
   ram_controller.processMessage(config.user, {["i"]=itemlist})
@@ -152,9 +151,11 @@ local ping_func = function()
     messenger.send(client, config.user, messenger.PING)
 
     -- check if they have timedout
-    host.client_ping[clientID] = (host.client_ping[clientID] or 4) - 1
-    if host.client_ping[clientID] <= 0 then
+	local ping = (host.client_ping[clientID] or 4) - 1
+    host.client_ping[clientID] = ping
+    if host.client_ping[clientID] < 0 then
       -- ping timeout
+	  printOutput("invalid ping time: " .. ping)
       close_client(clientID, "[PING TIMEOUT]")
     end
   end

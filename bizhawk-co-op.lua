@@ -40,8 +40,7 @@ function printOutput(str)
 
 	if file ~= nil then
 		console.writeline(str)
-		file:write(str)
-		file:close()
+		file:writeline(str)
 		return
 	end
 	console.writeline("LUA is Unable to open file: " .. filename)
@@ -183,10 +182,10 @@ else
 end
 lblRooms = forms.label(mainform, "Rooms:", 34, 13)
 
-txtIP = forms.textbox(mainform, "", 200, 20, nil, 80, 40, false, false)
-txtUser = forms.textbox(mainform, "", 200, 20, nil, 80, 64, false, false)
-txtPass = forms.textbox(mainform, "", 200, 20, nil, 80, 88, false, false)
-txtPort = forms.textbox(mainform, '50000', 200, 20, nil, 80, 112, false, false)
+txtIP = forms.textbox(mainform, "localhost", 200, 20, nil, 80, 40, false, false)
+txtUser = forms.textbox(mainform, "dwooda", 200, 20, nil, 80, 64, false, false)
+txtPass = forms.textbox(mainform, "a", 200, 20, nil, 80, 88, false, false)
+txtPort = forms.textbox(mainform, '8080', 200, 20, nil, 80, 112, false, false)
 ddRamCode = forms.dropdown(mainform, os.dir("bizhawk-co-op\\ramcontroller"), 80, 138, 200, 10)
 lblIP = forms.label(mainform, "Host IP:", 32, 42)
 lblUser = forms.label(mainform, "Username:", 19, 66)
