@@ -120,6 +120,7 @@ end
 -- and the position of the first character after
 -- the scanned JSON object.
 function json.decode(s, startPos)
+  printOutput("decoding json: " .. s)
   startPos = startPos and startPos or 1
   startPos = decode_scanWhitespace(s,startPos)
   assert(startPos<=string.len(s), 'Unterminated JSON encoded object found at position in [' .. s .. ']')
@@ -165,6 +166,7 @@ end
 -- @param startPos The starting position for the scan.
 -- @return table, int The scanned array as a table, and the position of the next character to scan.
 function decode_scanArray(s,startPos)
+  printOutput("decode_scanArray")
   local array = {}	-- The return value
   local stringLen = string.len(s)
   assert(string.sub(s,startPos,startPos)=='[','decode_scanArray called but array does not start at position ' .. startPos .. ' in string:\n'..s )
@@ -193,6 +195,7 @@ end
 -- @param string s The JSON string to scan.
 -- @param int startPos The starting position of the comment
 function decode_scanComment(s, startPos)
+  printOutput("decode_scanComment")
   assert( string.sub(s,startPos,startPos+1)=='/*', "decode_scanComment called but comment does not start at position " .. startPos)
   local endPos = string.find(s,'*/',startPos+2)
   assert(endPos~=nil, "Unterminated comment in string at " .. startPos)
@@ -206,6 +209,7 @@ end
 -- @return object, int The object (true, false or nil) and the position at which the next character should be 
 -- scanned.
 function decode_scanConstant(s, startPos)
+  printOutput("decode scanConstant")
   local consts = { ["true"] = true, ["false"] = false, ["null"] = nil }
   local constNames = {"true","false","null"}
 
@@ -234,10 +238,9 @@ function decode_scanNumber(s,startPos)
 	) do
     endPos = endPos + 1
   end
-  local stringValue = 'return ' .. string.sub(s,startPos, endPos-1)
-  local stringEval = load(stringValue)
-  assert(stringEval, 'Failed to scan number [ ' .. stringValue .. '] in JSON string at position ' .. startPos .. ' : ' .. endPos)
-  return stringEval(), endPos
+  local numVal = tonumber(string.sub(s,startPos, endPos-1))
+  printOutput("json decode_scanNumber -- stringValue: " .. numVal)
+  return numVal, endPos
 end
 
 --- Scans a JSON object into a Lua object.
@@ -247,6 +250,7 @@ end
 -- @param startPos The starting position of the scan.
 -- @return table, int The scanned object as a table and the position of the next character to scan.
 function decode_scanObject(s,startPos)
+  printOutput("json decode scanObject")
   local object = {}
   local stringLen = string.len(s)
   local key, value

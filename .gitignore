@@ -35,3 +35,7 @@ tabletostr\.lua
 .vscode/
 *.bin
 N64/
+*.exe.config
+roms/
+mw-coop-log.txt
+

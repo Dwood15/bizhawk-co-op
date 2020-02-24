@@ -285,6 +285,24 @@ local validate_received_items = function ()
 
 	return item_counts
 end
+
+--Duplicated to get lua to shut the fuck up
+local timer_coroutine = function (time, callback)
+    local init = os.time()
+    local now
+
+    while true do
+      now = os.time()
+      if os.difftime(now, init) < time then
+        coroutine.yield(false)
+      else
+        init = now
+        printOutput("timer coroutine triggered")
+        coroutine.yield(callback())
+      end
+    end
+end
+
 local validation_timer = coroutine.create(timer_coroutine)
 coroutine.resume(validation_timer, 60, validate_received_items)
 

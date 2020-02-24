@@ -1,9 +1,9 @@
 --Abstracts message passing between two clients
 --author: TheOnlyOne
-local messenger = require("messenger.message_constants")
-local encoders = require("message_encoding")
-local decoders = require("message_decoding")
-local json = require("'bizhawk-co-op.json.json'")
+local messenger = require("bizhawk-co-op.messenger.message_constants")
+local encoders = require("bizhawk-co-op.messenger.message_encoding")
+local decoders = require("bizhawk-co-op.messenger.message_decoding")
+local json = require("bizhawk-co-op.json.json")
 
 --sends a message to the other clients
 --client_socket is the socket the message is being sent over
@@ -18,14 +18,16 @@ function messenger.send(client_socket, user, message_type, ...)
   --encode the message
   local message = {
     ['user'] = user,
-    ['msg_type'] = messenger.message_type_to_str[message_type],
+    ['msg_type'] = message_type,
     ['data'] = encoder(data)
   }
+  
+  local encoded_msg = json.encode(message)
   --send the message
-  printOutput("sending message: " .. message)
+  printOutput("sending message: " .. encoded_msg)
 
   -- Note: There's like 3 layers of json encode. this is NOT efficient for MW
-  client_socket:send(json.encod(message) .. "\n")
+  client_socket:send(encoded_msg .. "\n")
 end
 
 --recieves a message from the other client, returning the message type
@@ -58,6 +60,8 @@ function messenger.receive(client_socket, nonblocking)
     end
   end
 
+  printOutput("decoding the message received: " .. message)
+
   -- Note: There's like 3 layers of json decode. this is NOT efficient.
   local decoded = json.decode(message)
 
@@ -69,7 +73,6 @@ function messenger.receive(client_socket, nonblocking)
     return nil
   end
 
-  printOutput("message received: " .. message)
 
   local data = decoders[msg_type](decoded['data'])
   --return info

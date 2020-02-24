@@ -2,10 +2,10 @@
 --author: TheOnlyOne and TestRunner
 local sync = {}
 
-local messenger = require("messenger.messenger")
-local json = require('json.json')
-local sha1 = require("sha1")
-local ram_controller = require("ramcontroller.Ocarina of Time")
+local messenger = require("bizhawk-co-op.messenger.messenger")
+local json = require('bizhawk-co-op.json.json')
+local sha1 = require("bizhawk-co-op.sha1")
+local ram_controller = require("bizhawk-co-op.ramcontroller.Ocarina of Time")
 
 function sync.loadramcontroller()
   local require_status
@@ -155,8 +155,8 @@ local ping_func = function()
   return false
 end
 
-
-function timer_coroutine(time, callback)
+--Duplicated to get lua to shut the fuck up
+local timer_coroutine = function (time, callback)
     local init = os.time()
     local now
 
@@ -171,6 +171,7 @@ function timer_coroutine(time, callback)
       end
     end
 end
+
 local ping_timer = coroutine.create(timer_coroutine)
 coroutine.resume(ping_timer, 10, ping_func)
 

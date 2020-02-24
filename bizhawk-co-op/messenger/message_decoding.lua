@@ -1,5 +1,5 @@
 local json = require("bizhawk-co-op.json.json")
-local messenger = require("message_constants")
+local messenger = require("bizhawk-co-op.messenger.message_constants")
 
 local function memory_decoder(msg)
     printOutput("memory_decoder message: " .. msg)
@@ -12,9 +12,11 @@ local function ramevent_decoder(msg)
   end
 
 local function config_decoder(msg)
-    printOutput("config_decoder message: " .. msg)
+    printOutput("json decoding the config_decoder message: " .. msg)
 
     local split = json.decode(msg)
+
+	printOutput("successfuly decoded message")
 
     --get sync hash from message
     local their_sync_hash = split['sync_hash']
@@ -26,6 +28,7 @@ local function config_decoder(msg)
     local ramconfig = split['ramconfig']
 
     if ramconfig ~= nil then
+		printOutput("attempting to decode the ramconfig")
         ramconfig = json.decode(ramconfig)
     end
 

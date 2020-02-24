@@ -34,12 +34,11 @@ local filename = "mw-coop-log.txt"
 local file = io.open(filename, 'a')
 --Add a line to the output. Inserts a timestamp to the string
 function printOutput(str) 
-	str = string.gsub (str, "\n", "\r\n")
-	str = "[" .. os.date("%H:%M:%S", os.time()) .. "] " .. str
+	str = "[" .. os.date("%H:%M:%S", os.time()) .. "] " .. str .. "\n"
 
 	if file ~= nil then
 		console.writeline(str)
-		file:writeline(str)
+		file:write(str)
 		return
 	end
 	console.writeline("LUA is Unable to open file: " .. filename)

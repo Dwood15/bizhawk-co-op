@@ -1,5 +1,5 @@
 local json = require("bizhawk-co-op.json.json")
-local messenger = require("message_constants")
+local messenger = require("bizhawk-co-op.messenger.message_constants")
 
 local function memory_encoder(data)
     local to_encode = {}
