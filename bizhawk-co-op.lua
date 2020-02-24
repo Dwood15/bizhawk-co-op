@@ -135,7 +135,7 @@ end
 function leaveRoom()
 	printOutput("leaving room")
 	if (host.connected()) then
-		sendMessage["Quit"] = true
+		ShouldQuit = true
 	else 
 		host.close()
 	end
@@ -205,7 +205,7 @@ btnJoin = forms.button(mainform, "Join Room",
 	function() prepareConnection(); guiClick["Join Server"] = host.join end, 
 	195, 166, 85, 25)
 
-sendMessage = {}
+ShouldQuit = false
 local thread
 
 updateGUI()

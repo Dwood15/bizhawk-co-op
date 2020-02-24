@@ -200,9 +200,9 @@ function sync.syncRAM()
     end
 
     --Send Quit request
-    if sendMessage["Quit"] == true then
-      printOutput("sendMessage QUIT")
-      sendMessage["Quit"] = nil
+    if ShouldQuit then
+      printOutput("QUITTING")
+      ShouldQuit = false
 
       for _,client in pairs(host.clients) do
         messenger.send(client, config.user, messenger.QUIT)
