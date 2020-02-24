@@ -3,10 +3,9 @@
 local sync = {}
 
 local messenger = require("bizhawk-co-op.messenger.messenger")
-local ram_controller
-
-my_ID = nil
-
+local json = require('bizhawk-co-op.json.json')
+local sha1 = require("bizhawk-co-op.sha1")
+local ram_controller = require("ramcontroller.Ocarina of Time")
 
 function sync.loadramcontroller()
   local require_status
@@ -32,8 +31,6 @@ end
 function sync.syncconfig(client_socket, their_id)
   printOutput("Checking configuration consistency...")
   
-  local sha1 = require("bizhawk-co-op\\sha1")
-
   --construct a value representing the sync code that is in use
   local sync_code = ""
   -- COMMENTED OUT FOR DEVELOPMENT PURPOSES
@@ -85,10 +82,8 @@ function sync.syncconfig(client_socket, their_id)
   -- end
 
   if my_new_id ~= nil then
-    my_ID = my_new_id
     host.hostname = their_user
   elseif their_id ~= nil then
-    my_ID = 1
     host.hostname = config.user
   end
 
@@ -99,8 +94,6 @@ function sync.syncconfig(client_socket, their_id)
   printOutput("Configuration consistency check passed")
   return their_user
 end
-
-local json = require('bizhawk-co-op\\json\\json')
 
 function sync.sendItems(itemlist)
   for _,client in pairs(host.clients) do
