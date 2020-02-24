@@ -71,6 +71,26 @@ local send_player_name = false
 local send_player_items = false
 local player_names = {}
 
+local function tabletostring(table, header)
+	local retstr = ""
+	if type(table) == "table" then
+	  for key,val in pairs(table) do
+		local newHeader = (header == nil and key) or (header .. ":" .. key)
+		retstr = retstr .. tabletostring(val, newHeader) .. ","
+	  end
+	  retstr = retstr:sub(1, -2)
+	else
+	  if (table == true) then
+		retstr = header .. ":" .. "t"
+	  elseif (table == false) then
+		retstr = header .. ":" .. "f"
+	  else
+		retstr = header .. ":" .. table
+	  end
+	end
+	return retstr
+  end
+
 
 local save_entry = function(key, value)
 	printOutput("attempting to save entry")
@@ -89,6 +109,38 @@ local save_entry = function(key, value)
 	end
 end
 
+
+
+local function stringtotable(split_message)
+	local ramevent = {}
+  
+	for _,event in pairs(split_message) do
+	  local splitevent = strsplit(event, ":")
+  
+	  local depth = 1
+	  local eventDive = ramevent
+	  while splitevent[depth + 2] ~= nil do
+		splitevent[depth] = tonumber(splitevent[depth]) or splitevent[depth]
+		if eventDive[splitevent[depth]] == nil then
+		  eventDive[splitevent[depth]] = {}
+		end
+		eventDive = eventDive[splitevent[depth]]
+  
+		depth = depth + 1
+	  end
+	  splitevent[depth] = tonumber(splitevent[depth]) or splitevent[depth]
+  
+	  if splitevent[depth + 1] == 't' then
+		eventDive[splitevent[depth]] = true
+	  elseif splitevent[depth + 1] == 'f' then
+		eventDive[splitevent[depth]] = false
+	  else
+		eventDive[splitevent[depth]] = tonumber(splitevent[depth + 1]) or splitevent[depth + 1]
+	  end
+	end
+  
+	return ramevent
+  end
 
 local load_save = function()
 	printOutput("attempting to load savedata")

@@ -2,7 +2,7 @@
 --author: TheOnlyOne and TestRunner
 local sync = {}
 
-local messenger = require("bizhawk-co-op\\messenger")
+local messenger = require("bizhawk-co-op.messenger.messenger")
 local ram_controller
 
 my_ID = nil
