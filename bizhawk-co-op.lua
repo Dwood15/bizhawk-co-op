@@ -6,7 +6,6 @@ local txtUser, txtPass, lblUser, lblPass, ddRamCode, lblRamCode
 local lblPort, txtPort
 config = {}
 
-
 function strsplit(inputstr, sep, max)
   if not inputstr then
     return {}
@@ -46,8 +45,8 @@ function printOutput(str)
 	console.writeline("LUA is Unable to open file: " .. filename)
 end
 
-host = require("bizhawk-co-op\\host")
-
+local host = require("bizhawk-co-op.host")
+local sync = require("bizhawk-co-op.sync")
 
 local roomlist = false
 function refreshRooms() 
@@ -64,6 +63,7 @@ function refreshRooms()
 
 	updateGUI()
 end
+
 
 
 --Reloads all the info on the form. Disables any inappropriate components
@@ -216,7 +216,7 @@ emu.yield()
 emu.yield()
 
 
-local sync = require("bizhawk-co-op\\sync")
+
 
 ---------------------
 --    Main loop    --

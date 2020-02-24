@@ -2,9 +2,9 @@
 --author: TheOnlyOne and TestRunner
 local sync = {}
 
-local messenger = require("bizhawk-co-op.messenger.messenger")
-local json = require('bizhawk-co-op.json.json')
-local sha1 = require("bizhawk-co-op.sha1")
+local messenger = require("messenger.messenger")
+local json = require('json.json')
+local sha1 = require("sha1")
 local ram_controller = require("ramcontroller.Ocarina of Time")
 
 function sync.loadramcontroller()

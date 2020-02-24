@@ -10,8 +10,8 @@ local function declare (name, initval)
 	rawset(_G, name, initval or false)
 end
 
-local oot = require('bizhawk-co-op\\helpers\\oot')
-local json = require('bizhawk-co-op\\json\\json')
+local oot = require('bizhawk-co-op.helpers.oot')
+local json = require('bizhawk-co-op.json.json')
 local oot_rom = {}
 
 local rando_context = mainmemory.read_u32_be(0x1C6E90 + 0x15D4) - 0x80000000
