@@ -40,7 +40,7 @@ function printOutput(str)
 
 	if file ~= nil then
 		console.writeline(str)
-		file:write(str)
+		file:writeline(str)
 		file:close()
 		return
 	end

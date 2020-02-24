@@ -32,6 +32,6 @@ config\.ini
 lttp-keys\.lua
 
 tabletostr\.lua
-
+.vscode/
 *.bin
 N64/

@@ -103,7 +103,7 @@ end
 
 function sync.sendItems(itemlist)
   for _,client in pairs(host.clients) do
-  printOutput("processing itemList for client: [" .. client .. "]")
+  printOutput("processing itemList for client: []")
   printOutput("said itemList: " .. itemlist)
 
 
@@ -153,7 +153,7 @@ local ping_func = function()
 
     -- check if they have timedout
     host.client_ping[clientID] = (host.client_ping[clientID] or 4) - 1
-    if host.client_ping[clientID] <= 0 then
+    if host.client_ping[clientID] < 0 then
       -- ping timeout
       close_client(clientID, "[PING TIMEOUT]")
     end
