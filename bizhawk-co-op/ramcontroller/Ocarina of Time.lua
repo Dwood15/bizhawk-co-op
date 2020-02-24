@@ -124,7 +124,6 @@ load_save()
 
 local shop_scenes = {[0x2C]=1, [0x2D]=1, [0x2E]=1, [0x2F]=1, [0x30]=1, [0x31]=1, [0x32]=1, [0x33]=1, [0x42]=1, [0x4B]=1}
 local function safeToGiveItem()
-	printOutput("checking if it's safe to give an item")
 	local details
 	local scene
 	_, details = oot.get_current_game_mode()

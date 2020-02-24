@@ -259,9 +259,10 @@ while 1 do
 
 	--If connected, run the syncinputs thread
 	if host.connected() then
-		printOutput("host is connected, attempting to sync")
+		
 		--If the thread didn't yield, then create a new one
 		if thread == nil or coroutine.status(thread) == "dead" then
+			printOutput("host is connected, creating sync thread")
 			thread = coroutine.create(sync.syncRAM)
 		end
 		local status, err = coroutine.resume(thread)
