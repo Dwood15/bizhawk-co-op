@@ -2,6 +2,7 @@
 
 local socket = require("socket")
 local http = require("socket.http")
+local json = require("bizhawk-co-op.json.json")
 sync = require("bizhawk-co-op.sync")
 
 local host = {}
@@ -142,10 +143,16 @@ function host.listen()
 	client:setoption('linger', {['on']=false, ['timeout']=0})
 
 	--sync the gameplay
-	local success, their_user = nil
+	local success, their_user, h = nil
 
 	--Working around lua's awkward circular reference issues
-	success, their_user, host = pcall(sync.syncconfig, client, clientID, host)
+	
+	success, their_user, h = pcall(sync.syncconfig, client, clientID, host)
+	if h ~= nil then 
+		printOutput("new host: " .. json.encode(h))
+		printOutput("old host: " .. json.encode(host))
+		error("host and new host aaahh")
+	end
 
 	if success and their_user then
 		host.clients[clientID] = client
