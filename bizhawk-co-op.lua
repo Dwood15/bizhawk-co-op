@@ -1,6 +1,6 @@
 local guiClick = {}
 
-mainform = nil
+local mainform = nil
 local text1, lblRooms, btnGetRooms, ddRooms, btnQuit, btnJoin, btnHost
 local txtUser, txtPass, lblUser, lblPass, ddRamCode, lblRamCode
 local lblPort, txtPort
@@ -62,8 +62,6 @@ function refreshRooms()
 
 	updateGUI()
 end
-
-
 
 --Reloads all the info on the form. Disables any inappropriate components
 function updateGUI()

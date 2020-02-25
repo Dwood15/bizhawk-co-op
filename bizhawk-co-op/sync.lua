@@ -53,17 +53,12 @@ function sync.syncconfig(client_socket, their_id)
   local received_message_type, their_user, received_data = messenger.receive(client_socket)
   if (received_message_type == messenger.ERROR) then
     printOutput("Configuration consistency check failed: " .. their_user)
-    return false
+    return false, nil
   end
 
   if (received_message_type ~= messenger.CONFIG) then
     printOutput("Configuration consistency check failed: Unexpected message type received.")
-    return false
-  end
-
-  if (host.users[their_user]) then
-    printOutput("Configuration consistency check failed: Username in use")
-    return false   
+    return false, nil
   end
 
   local their_sync_hash = received_data[1]
@@ -81,10 +76,15 @@ function sync.syncconfig(client_socket, their_id)
     -- return false
   -- end
 
+  local hostname = ''
+  if my_new_id == nil and their_id == nil then
+    printOutput("failed to get config and stuff")
+  end
+
   if my_new_id ~= nil then
-    host.hostname = their_user
+    hostname = their_user
   elseif their_id ~= nil then
-    host.hostname = config.user
+    hostname = config.user
   end
 
   if newconfig ~= nil then
@@ -92,7 +92,7 @@ function sync.syncconfig(client_socket, their_id)
   end
 
   printOutput("Configuration consistency check passed")
-  return their_user
+  return true, their_user, hostname
 end
 
 function sync.sendItems(itemlist)

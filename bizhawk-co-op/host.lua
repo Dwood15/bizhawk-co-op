@@ -142,7 +142,11 @@ function host.listen()
 	client:setoption('linger', {['on']=false, ['timeout']=0})
 
 	--sync the gameplay
-	local success, their_user = pcall(sync.syncconfig, client, clientID)
+	local success, their_user = nil
+
+	--Working around lua's awkward circular reference issues
+	success, their_user, host = pcall(sync.syncconfig, client, clientID, host)
+
 	if success and their_user then
 		host.clients[clientID] = client
 		host.users[their_user] = clientID
@@ -244,7 +248,7 @@ function host.join()
 	--display the server's information
 	local peername, peerport = client:getpeername()
 	printOutput("Joined room " .. config.room)
-
+	printOutput("peer name: " .. peername .. " peerport: " .. peerport)
 	--make sure we don't block waiting for a response
 	client:settimeout(5)
 	client:setoption('linger', {['on']=false, ['timeout']=0})
@@ -253,7 +257,10 @@ function host.join()
 	coroutine.yield()
 
 	--sync the gameplay
-	if (sync.syncconfig(client, nil)) then
+	local success, client_user, hostname = sync.syncconfig(client, nil)
+	host.hostname = hostname
+
+	if (success and client_user and hostname) then
 		host.clients[1] = client
 		host.client_ping[1] = 4
 		host.users[host.hostname] = 1
