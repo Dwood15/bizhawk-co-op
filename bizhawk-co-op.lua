@@ -1,11 +1,10 @@
 local guiClick = {}
 
-mainform = nil
+local mainform = nil
 local text1, lblRooms, btnGetRooms, ddRooms, btnQuit, btnJoin, btnHost
 local txtUser, txtPass, lblUser, lblPass, ddRamCode, lblRamCode
 local lblPort, txtPort
 config = {}
-
 
 function strsplit(inputstr, sep, max)
   if not inputstr then
@@ -31,28 +30,22 @@ function strsplit(inputstr, sep, max)
   return t
 end
 
-
-local sync = require("bizhawk-co-op\\sync")
-
-
+local filename = "mw-coop-log.txt"
+local file = io.open(filename, 'a')
 --Add a line to the output. Inserts a timestamp to the string
 function printOutput(str) 
-	local text = forms.gettext(text1)
-	local pos = #text
-	forms.setproperty(text1, "SelectionStart", pos)
+	str = "[" .. os.date("%H:%M:%S", os.time()) .. "] " .. str .. "\n"
 
-	str = string.gsub (str, "\n", "\r\n")
-	str = "[" .. os.date("%H:%M:%S", os.time()) .. "] " .. str
-	if pos > 0 then
-		str = "\r\n" .. str
+	if file ~= nil then
+		console.writeline(str)
+		file:write(str)
+		return
 	end
-
-	forms.setproperty(text1, "SelectedText", str)
+	console.writeline("LUA is Unable to open file: " .. filename)
 end
 
-
-host = require("bizhawk-co-op\\host")
-
+local host = require("bizhawk-co-op.host")
+local sync = require("bizhawk-co-op.sync")
 
 local roomlist = false
 function refreshRooms() 
@@ -69,7 +62,6 @@ function refreshRooms()
 
 	updateGUI()
 end
-
 
 --Reloads all the info on the form. Disables any inappropriate components
 function updateGUI()
@@ -121,6 +113,7 @@ event.onexit(function () host.close(); forms.destroy(mainform) end)
 
 --Load the changes from the form and disable any appropriate components
 function prepareConnection()
+	printOutput("prepareConnection")
 	if roomlist then
 		config.room = forms.gettext(ddRooms)
 	else 
@@ -131,13 +124,15 @@ function prepareConnection()
 	config.pass = forms.gettext(txtPass)
 	config.port = forms.gettext(txtPort)
 	config.hostname = forms.gettext(txtIP)
+	printOutput("end prepareConnection")
 end
 
 
 --Quit/Disconnect click handle for the quit button
 function leaveRoom()
+	printOutput("leaving room")
 	if (host.connected()) then
-		sendMessage["Quit"] = true
+		ShouldQuit = true
 	else 
 		host.close()
 	end
@@ -184,10 +179,10 @@ else
 end
 lblRooms = forms.label(mainform, "Rooms:", 34, 13)
 
-txtIP = forms.textbox(mainform, "", 200, 20, nil, 80, 40, false, false)
-txtUser = forms.textbox(mainform, "", 200, 20, nil, 80, 64, false, false)
-txtPass = forms.textbox(mainform, "", 200, 20, nil, 80, 88, false, false)
-txtPort = forms.textbox(mainform, '50000', 200, 20, nil, 80, 112, false, false)
+txtIP = forms.textbox(mainform, "localhost", 200, 20, nil, 80, 40, false, false)
+txtUser = forms.textbox(mainform, "dwooda", 200, 20, nil, 80, 64, false, false)
+txtPass = forms.textbox(mainform, "a", 200, 20, nil, 80, 88, false, false)
+txtPort = forms.textbox(mainform, '8080', 200, 20, nil, 80, 112, false, false)
 ddRamCode = forms.dropdown(mainform, os.dir("bizhawk-co-op\\ramcontroller"), 80, 138, 200, 10)
 lblIP = forms.label(mainform, "Host IP:", 32, 42)
 lblUser = forms.label(mainform, "Username:", 19, 66)
@@ -198,8 +193,7 @@ lblRamCode = forms.label(mainform, "Game Script:", 10, 140)
 forms.setproperty(txtPass, 'PasswordChar', '*')
 
 
-btnQuit = forms.button(mainform, "Leave Room", leaveRoom, 
-	15, 166, 85, 25)
+btnQuit = forms.button(mainform, "Leave Room", leaveRoom, 15, 166, 85, 25)
 forms.setproperty(btnQuit, 'Enabled', false)
 btnHost = forms.button(mainform, "Create Room", 
 	function() prepareConnection(); guiClick["Host Server"] = host.start end, 
@@ -208,7 +202,7 @@ btnJoin = forms.button(mainform, "Join Room",
 	function() prepareConnection(); guiClick["Join Server"] = host.join end, 
 	195, 166, 85, 25)
 
-sendMessage = {}
+ShouldQuit = false
 local thread
 
 updateGUI()
@@ -217,6 +211,9 @@ local threads = {}
 
 emu.yield()
 emu.yield()
+
+
+
 
 ---------------------
 --    Main loop    --
@@ -258,8 +255,10 @@ while 1 do
 
 	--If connected, run the syncinputs thread
 	if host.connected() then
+		
 		--If the thread didn't yield, then create a new one
 		if thread == nil or coroutine.status(thread) == "dead" then
+			printOutput("host is connected, creating sync thread")
 			thread = coroutine.create(sync.syncRAM)
 		end
 		local status, err = coroutine.resume(thread)

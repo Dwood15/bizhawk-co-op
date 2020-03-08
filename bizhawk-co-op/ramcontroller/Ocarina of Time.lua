@@ -10,8 +10,8 @@ local function declare (name, initval)
 	rawset(_G, name, initval or false)
 end
 
-local oot = require('bizhawk-co-op\\helpers\\oot')
-
+local oot = require('bizhawk-co-op.helpers.oot')
+local json = require('bizhawk-co-op.json.json')
 local oot_rom = {}
 
 local rando_context = mainmemory.read_u32_be(0x1C6E90 + 0x15D4) - 0x80000000
@@ -46,6 +46,7 @@ local player_num = mainmemory.read_u8(player_id_addr)
 
 -- gives an item
 local get_item = function(item)
+	printOutput("attempting to give the player an item")
 	if (item.i == 0) then
 		-- Trying to place padded items
 		printOutput("[Warn] Received an invalid item!")
@@ -70,8 +71,30 @@ local send_player_name = false
 local send_player_items = false
 local player_names = {}
 
+local function tabletostring(table, header)
+	local retstr = ""
+	if type(table) == "table" then
+	  for key,val in pairs(table) do
+		local newHeader = (header == nil and key) or (header .. ":" .. key)
+		retstr = retstr .. tabletostring(val, newHeader) .. ","
+	  end
+	  retstr = retstr:sub(1, -2)
+	else
+	  if (table == true) then
+		retstr = header .. ":" .. "t"
+	  elseif (table == false) then
+		retstr = header .. ":" .. "f"
+	  else
+		retstr = header .. ":" .. table
+	  end
+	end
+	return retstr
+  end
+
 
 local save_entry = function(key, value)
+	printOutput("attempting to save entry")
+
 	if value.i == 0 then
 		return
 	end
@@ -87,7 +110,40 @@ local save_entry = function(key, value)
 end
 
 
+
+local function stringtotable(split_message)
+	local ramevent = {}
+  
+	for _,event in pairs(split_message) do
+	  local splitevent = strsplit(event, ":")
+  
+	  local depth = 1
+	  local eventDive = ramevent
+	  while splitevent[depth + 2] ~= nil do
+		splitevent[depth] = tonumber(splitevent[depth]) or splitevent[depth]
+		if eventDive[splitevent[depth]] == nil then
+		  eventDive[splitevent[depth]] = {}
+		end
+		eventDive = eventDive[splitevent[depth]]
+  
+		depth = depth + 1
+	  end
+	  splitevent[depth] = tonumber(splitevent[depth]) or splitevent[depth]
+  
+	  if splitevent[depth + 1] == 't' then
+		eventDive[splitevent[depth]] = true
+	  elseif splitevent[depth + 1] == 'f' then
+		eventDive[splitevent[depth]] = false
+	  else
+		eventDive[splitevent[depth]] = tonumber(splitevent[depth + 1]) or splitevent[depth + 1]
+	  end
+	end
+  
+	return ramevent
+  end
+
 local load_save = function()
+	printOutput("attempting to load savedata")
 	-- open file
 	local file_loc = '.\\bizhawk-co-op\\savedata\\' .. gameinfo.getromname() .. '.dat'
 	local f = io.open(file_loc, "r")
@@ -147,6 +203,7 @@ local function processQueue()
 		if received_counter > internal_count then
 			local item = received_items[internal_count + 1]
 			get_item(item)
+			printOutput("giving items: [" ..  json.encode(received_items) .. "]")
 		end
 	end
 end
@@ -228,6 +285,24 @@ local validate_received_items = function ()
 
 	return item_counts
 end
+
+--Duplicated to get lua to shut the fuck up
+local timer_coroutine = function (time, callback)
+    local init = os.time()
+    local now
+
+    while true do
+      now = os.time()
+      if os.difftime(now, init) < time then
+        coroutine.yield(false)
+      else
+        init = now
+        printOutput("timer coroutine triggered")
+        coroutine.yield(callback())
+      end
+    end
+end
+
 local validation_timer = coroutine.create(timer_coroutine)
 coroutine.resume(validation_timer, 60, validate_received_items)
 
@@ -300,6 +375,7 @@ function oot_rom.getMessage()
 
 	-- return the messages
 	if has_content then
+		printOutput("ootRom.getMessage() attempting to process message: ")
 		return message
 	else
 		return false
@@ -309,6 +385,7 @@ end
 
 -- Process a message from another player and update RAM
 function oot_rom.processMessage(their_user, message)
+	printOutput("oot_rom.processMessage: user:" .. their_user .. json.encode(message))
 	-- "i" type is for handling item split events, which
 	-- is not something this ram controller does. However
 	-- this event will happen any time a player joins,
@@ -352,6 +429,8 @@ function oot_rom.processMessage(their_user, message)
 		if table_count(message["m"]) > 1 then
 			printOutput("[Warn] " .. their_user .. " detected you were missing items. Attempting to resync...")
 		end
+
+		printOutput("handling message: " .. json.encode(message))
 
 		for _,item in pairs(message["m"]) do
 			-- check if this is for this player, otherwise, ignore it

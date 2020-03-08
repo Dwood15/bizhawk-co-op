@@ -2,11 +2,10 @@
 --author: TheOnlyOne and TestRunner
 local sync = {}
 
-local messenger = require("bizhawk-co-op\\messenger")
-local ram_controller 
-
-my_ID = nil
-
+local messenger = require("bizhawk-co-op.messenger.messenger")
+local json = require('bizhawk-co-op.json.json')
+local sha1 = require("bizhawk-co-op.sha1")
+local ram_controller = require("bizhawk-co-op.ramcontroller.Ocarina of Time")
 
 function sync.loadramcontroller()
   local require_status
@@ -32,15 +31,14 @@ end
 function sync.syncconfig(client_socket, their_id)
   printOutput("Checking configuration consistency...")
   
-  local sha1 = require("bizhawk-co-op\\sha1")
-
   --construct a value representing the sync code that is in use
   local sync_code = ""
-  for line in io.lines("bizhawk-co-op.lua") do sync_code = sync_code .. line .. "\n" end
-  for line in io.lines("bizhawk-co-op\\host.lua") do sync_code = sync_code .. line .. "\n" end
-  for line in io.lines("bizhawk-co-op\\messenger.lua") do sync_code = sync_code .. line .. "\n" end
-  for line in io.lines("bizhawk-co-op\\sync.lua") do sync_code = sync_code .. line .. "\n" end
-  for line in io.lines("bizhawk-co-op\\ramcontroller\\" .. config.ramcode) do sync_code = sync_code .. line .. "\n" end
+  -- COMMENTED OUT FOR DEVELOPMENT PURPOSES
+  -- for line in io.lines("bizhawk-co-op.lua") do sync_code = sync_code .. line .. "\n" end
+  -- for line in io.lines("bizhawk-co-op\\host.lua") do sync_code = sync_code .. line .. "\n" end
+  -- for line in io.lines("bizhawk-co-op\\messenger.lua") do sync_code = sync_code .. line .. "\n" end
+  -- for line in io.lines("bizhawk-co-op\\sync.lua") do sync_code = sync_code .. line .. "\n" end
+  -- for line in io.lines("bizhawk-co-op\\ramcontroller\\" .. config.ramcode) do sync_code = sync_code .. line .. "\n" end
   local sync_hash = sha1.sha1(sync_code)
   
   -- only host sends config
@@ -55,17 +53,12 @@ function sync.syncconfig(client_socket, their_id)
   local received_message_type, their_user, received_data = messenger.receive(client_socket)
   if (received_message_type == messenger.ERROR) then
     printOutput("Configuration consistency check failed: " .. their_user)
-    return false
+    return false, nil
   end
 
   if (received_message_type ~= messenger.CONFIG) then
     printOutput("Configuration consistency check failed: Unexpected message type received.")
-    return false
-  end
-
-  if (host.users[their_user]) then
-    printOutput("Configuration consistency check failed: Username in use")
-    return false   
+    return false, nil
   end
 
   local their_sync_hash = received_data[1]
@@ -74,19 +67,24 @@ function sync.syncconfig(client_socket, their_id)
 
   --check consistency of configurations
   --check sync code
-  if (sync_hash ~= their_sync_hash) then
-    printOutput("Configuration consistency check failed: Bad hash")
-    printOutput("You are not both using the same sync code (perhaps one of you is using an older version?)")
-    printOutput("Make sure your sync code is the same and try again.")
-    return false
+
+    -- COMMENTED OUT FOR DEVELOPMENT PURPOSES
+  -- if (sync_hash ~= their_sync_hash) then
+    -- printOutput("Configuration consistency check failed: Bad hash")
+    -- printOutput("You are not both using the same sync code (perhaps one of you is using an older version?)")
+    -- printOutput("Make sure your sync code is the same and try again.")
+    -- return false
+  -- end
+
+  local hostname = ''
+  if my_new_id == nil and their_id == nil then
+    printOutput("failed to get config and stuff")
   end
 
   if my_new_id ~= nil then
-    my_ID = my_new_id
-    host.hostname = their_user
+    hostname = their_user
   elseif their_id ~= nil then
-    my_ID = 1
-    host.hostname = config.user
+    hostname = config.user
   end
 
   if newconfig ~= nil then
@@ -94,12 +92,13 @@ function sync.syncconfig(client_socket, their_id)
   end
 
   printOutput("Configuration consistency check passed")
-  return their_user
+  return true, their_user, hostname
 end
-
 
 function sync.sendItems(itemlist)
   for _,client in pairs(host.clients) do
+	printOutput("processing itemList for client:")
+	printOutput("said itemList: " .. json.encode(itemlist))
     messenger.send(client, config.user, messenger.RAMEVENT, {["i"]=itemlist})
   end 
   ram_controller.processMessage(config.user, {["i"]=itemlist})
@@ -108,6 +107,8 @@ end
 
 
 local close_client = function(clientID, err)
+  printOutput("close client, clientID: [" .. clientID .. "] err: " .. err)
+
   local their_user = "The other player"
   for name, id in pairs(host.users) do
     if id == clientID then
@@ -139,20 +140,23 @@ end
 local ping_func = function()
   for clientID, client in pairs(host.clients) do
     -- send PING message
+    printOutput("calling ping func for clientID: " .. clientID)
     messenger.send(client, config.user, messenger.PING)
 
     -- check if they have timedout
-    host.client_ping[clientID] = (host.client_ping[clientID] or 4) - 1
-    if host.client_ping[clientID] <= 0 then
+	local ping = (host.client_ping[clientID] or 4) - 1
+    host.client_ping[clientID] = ping
+    if host.client_ping[clientID] < 0 then
       -- ping timeout
+	  printOutput("invalid ping time: " .. ping)
       close_client(clientID, "[PING TIMEOUT]")
     end
   end
   return false
 end
 
-
-function timer_coroutine(time, callback)
+--Duplicated to get lua to shut the fuck up
+local timer_coroutine = function (time, callback)
     local init = os.time()
     local now
 
@@ -162,10 +166,12 @@ function timer_coroutine(time, callback)
         coroutine.yield(false)
       else
         init = now
+        printOutput("timer coroutine triggered")
         coroutine.yield(callback())
       end
     end
 end
+
 local ping_timer = coroutine.create(timer_coroutine)
 coroutine.resume(ping_timer, 10, ping_func)
 
@@ -174,6 +180,7 @@ coroutine.resume(ping_timer, 10, ping_func)
 --pressed for both players on every frame. Sends and receives instructions
 --that must be performed simultaneously; such as pausing and saving
 function sync.syncRAM()
+  printOutput("sync RAM ")
   while true do
     -- check for PING TIMEOUT and send PINGS
     if coroutine.status(ping_timer) == "dead" then
@@ -187,8 +194,9 @@ function sync.syncRAM()
     end
 
     --Send Quit request
-    if sendMessage["Quit"] == true then 
-      sendMessage["Quit"] = nil
+    if ShouldQuit then
+      printOutput("QUITTING")
+      ShouldQuit = false
 
       for _,client in pairs(host.clients) do
         messenger.send(client, config.user, messenger.QUIT)

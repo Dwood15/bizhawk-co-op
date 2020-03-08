@@ -2,7 +2,8 @@
 
 local socket = require("socket")
 local http = require("socket.http")
-local sync = require("bizhawk-co-op\\sync")
+local json = require("bizhawk-co-op.json.json")
+sync = require("bizhawk-co-op.sync")
 
 local host = {}
 
@@ -16,11 +17,11 @@ host.client_ping = {}
 local itemcount
 
 function host.start()
+	printOutput("host.start beginning")
 	if (host.status == 'Host') then
 		if host.locked then
 			local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/create' ..
-				'?user=' .. config.user ..
-				'&pass=' .. config.pass)
+				'?user=dwooda' .. '&pass=a')
 			if (err == 200) then
 				host.locked = false
 				updateGUI()
@@ -30,8 +31,7 @@ function host.start()
 			end
 		else
 			local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/destroy' ..
-				'?user=' .. config.user ..
-				'&pass=' .. config.pass)
+				'?user=dwooda' .. '&pass=a')
 			if (err == 200) then
 				host.locked = true
 				updateGUI()
@@ -78,6 +78,7 @@ function host.start()
 
 	coroutine.yield()
 
+	printOutput("creating the server")
 	--create the server
 	server = socket.bind("*", config.port, 1)
 	if (server == nil) then
@@ -92,9 +93,7 @@ function host.start()
 	server:settimeout(0) -- non-blocking
 	printOutput("Created server on port " .. setport)
 
-	local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/create' ..
-		'?user=' .. config.user ..
-		'&pass=' .. config.pass)
+	local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/create?user=dwooda&pass=a')
 	if (err == 200) then
 		printOutput('Room initialized.')
 	else
@@ -144,7 +143,17 @@ function host.listen()
 	client:setoption('linger', {['on']=false, ['timeout']=0})
 
 	--sync the gameplay
-	local success, their_user = pcall(sync.syncconfig, client, clientID)
+	local success, their_user, h = nil
+
+	--Working around lua's awkward circular reference issues
+	
+	success, their_user, h = pcall(sync.syncconfig, client, clientID, host)
+	if h ~= nil then 
+		printOutput("new host: " .. json.encode(h))
+		printOutput("old host: " .. json.encode(host))
+		error("host and new host aaahh")
+	end
+
 	if success and their_user then
 		host.clients[clientID] = client
 		host.users[their_user] = clientID
@@ -187,6 +196,7 @@ end
 
 
 function host.join()
+	printOutput("host.join")
 	if (sync.loadramcontroller() == false) then
 		return
 	end
@@ -220,8 +230,8 @@ function host.join()
 	if config.room ~= '(Custom IP)' then
 		local err
 		config.hostname, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/join' ..
-			'?user=' .. config.room ..
-			'&pass=' .. config.pass)
+			'?user=' .. 'dwooda' ..
+			'&pass=' .. 'a')
 		if (err == 200) then
 			printOutput('Joining ' .. config.room)
 		else
@@ -245,7 +255,7 @@ function host.join()
 	--display the server's information
 	local peername, peerport = client:getpeername()
 	printOutput("Joined room " .. config.room)
-
+	printOutput("peer name: " .. peername .. " peerport: " .. peerport)
 	--make sure we don't block waiting for a response
 	client:settimeout(5)
 	client:setoption('linger', {['on']=false, ['timeout']=0})
@@ -254,7 +264,10 @@ function host.join()
 	coroutine.yield()
 
 	--sync the gameplay
-	if (sync.syncconfig(client, nil)) then	
+	local success, client_user, hostname = sync.syncconfig(client, nil)
+	host.hostname = hostname
+
+	if (success and client_user and hostname) then
 		host.clients[1] = client
 		host.client_ping[1] = 4
 		host.users[host.hostname] = 1
@@ -263,13 +276,15 @@ function host.join()
 		host.close()
 		updateGUI()
 	end
-
+	printOutput("end host.join")
 	return
 end
 
 
 --when the script finishes, make sure to close the connection
 function host.close()
+	printOutput("closing connection")
+
 	host.status = 'Idle'
 	host.locked = false
 
@@ -288,8 +303,8 @@ function host.close()
 		changed = true
 
 		local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/destroy' ..
-			'?user=' .. config.user ..
-			'&pass=' .. config.pass)
+			'?user=' .. 'dwooda' ..
+			'&pass=' .. 'a')
 		if (err == 200) then
 			printOutput('Room closed.')
 		else
@@ -302,6 +317,7 @@ function host.close()
 		printOutput("Server closed.")
 		updateGUI()
 	end
+	printOutput("end host.close()")
 end
 
 
@@ -319,7 +335,8 @@ end
 
 
 --Get the list of Rooms
-function host.getRooms() 
+function host.getRooms()
+	printOutput("getting rooms")
 	local roomstr, err = http.request('https://us-central1-mzm-coop.cloudfunctions.net/getrooms')
 	if (err == 200) then
 		if (roomstr == '') then
